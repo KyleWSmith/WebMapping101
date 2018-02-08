@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+          <title>Mexico City Webmap</title>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" />
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="resources/leaflet-ajax/dist/leaflet.ajax.js"></script>
+		<style>
+            #header {
+                height: 75px;
+                background-color: darkgreen;
+                color: wheat;
+            }
+            #mapdiv {
+                height: 650px;
+                background-color: salmon;
+            }
+            #side_pane {
+            height: 650px;
+                background-color: beige;
+            }
+            #footer {
+                height: 75px;
+                background-color: darkgray;
+            }
+		</style>
+     </head>
+    <div id="header" class="col-md-12">
+        <h1 class="text-center">Mexico City</h1>
+    </div>
+
+    <div id="side_pane" class="col-md-3">
+        <h1 class="text-center">Attractions</h1>
+        <button id="zoomToZocalo" class="form-control btn-primary">Zocalo</button>
+    </div>
+    <div id="mapdiv" class="col-md-9"></div>
+    <div id="footer" class="col-md-12">
+        <h4 id="map_coords" class="text-center">Latitude: 19.4 Longitude: -99.1 Zoom Level: 11</h4>
+        <h4 class="text-center">&copy;2018 <a href="http://spatialistic.com">Kyle W. Smith Spatialistic</a></h4>
+    </div>
+    <body>
+    <script>
+       var mymap = L.map('mapdiv')
+       mymap.setView([19.4,-99.1],11);
+        
+       var backgroundLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
+       mymap.addLayer(backgroundLayer);
+    
+        var zocaloMarker = L.marker([19.43278, -99.13333]).addTo(mymap).bindPopup("<h3 class='text-center'>Zocalo</h3><img src='http://cdmxtravel.com/assets/cache/e9507053dd36cb9217816ffb566c8720/experience-9-1-zocalo-corazon-metropolis-3_1141x478_cropFromCenter.jpg' width='200px'><a href='https://en.wikipedia.org/wiki/Z%C3%B3calo' target='blank'></a>"); //adds marker to map (chained methods)
+       
+        $("#zoomToZocalo").click(function(){
+             mymap.setView([19.43278, -99.13333], 17);
+         });
+        
+        //update bottom div with lat/long under mouse
+        mymap.on('mousemove', function(e){
+            var str = "Latitude: "+e.latlng.lat.toFixed(5)+"    Longitude:   "+e.latlng.lng.toFixed(5)+"  Zoom Level: "+mymap.getZoom();
+            $("#map_coords").html(str);
+        });
+        
+        var geojsonLayer = new L.GeoJSON.AJAX('data/attractions.geojson').addTo(mymap);
+        </script>
+    </body>
+</html>
