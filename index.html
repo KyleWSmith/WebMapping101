@@ -9,7 +9,7 @@
 <!-- Make sure you put this AFTER Leaflet's CSS -->
 <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="resources/leaflet-ajax/dist/leaflet.ajax.js"></script>
+<script src="resources/leaflet-ajax/dist/leaflet.ajax.js"></script>
 		<style>
             #header {
                 height: 75px;
@@ -36,7 +36,7 @@
 
     <div id="side_pane" class="col-md-3">
         <h1 class="text-center">Attractions</h1>
-        <button id="zoomToZocalo" class="form-control btn-primary">Zocalo</button>
+       <button id="reset" class="form-control btn-warning">Reset</button> 
     </div>
     <div id="mapdiv" class="col-md-9"></div>
     <div id="footer" class="col-md-12">
@@ -50,20 +50,41 @@
         
        var backgroundLayer = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
        mymap.addLayer(backgroundLayer);
-    
-        var zocaloMarker = L.marker([19.43278, -99.13333]).addTo(mymap).bindPopup("<h3 class='text-center'>Zocalo</h3><img src='http://cdmxtravel.com/assets/cache/e9507053dd36cb9217816ffb566c8720/experience-9-1-zocalo-corazon-metropolis-3_1141x478_cropFromCenter.jpg' width='200px'><a href='https://en.wikipedia.org/wiki/Z%C3%B3calo' target='blank'></a>"); //adds marker to map (chained methods)
        
-        $("#zoomToZocalo").click(function(){
-             mymap.setView([19.43278, -99.13333], 17);
-         });
         
         //update bottom div with lat/long under mouse
         mymap.on('mousemove', function(e){
             var str = "Latitude: "+e.latlng.lat.toFixed(5)+"    Longitude:   "+e.latlng.lng.toFixed(5)+"  Zoom Level: "+mymap.getZoom();
             $("#map_coords").html(str);
         });
+        //reset view button:
+        $("#reset").click(function(){
+            mymap.setView([19.4,-99.1],11)
+        });
         
-        var geojsonLayer = new L.GeoJSON.AJAX('data/attractions.geojson').addTo(mymap);
+        //Create buttons from geoJSON file:
+    
+        var geojsonLayer = new L.GeoJSON.AJAX('data/attractions.geojson', {pointToLayer: function(feature, latlng) {
+            var str = "<button id='zoomTo"+feature.properties.name.replace(/ /g, '');
+            str += "' class='form-control btn btn-primary attraction'>";
+            str += feature.properties.name+"</button>";
+            $("#side_pane").append(str);
+            
+            $("#zoomTo" + feature.properties.name.replace(/ /g, '')).click(function(){
+                mymap.setView([latlng.lat, latlng.lng], 17);
+            });
+        }});
+        //Add all values in geoJSON to points
+        var geojsonLayer = new L.GeoJSON.AJAX('data/attractions.geojson', {pointToLayer: function(feature, latlng){
+            var str = "<h4>"+feature.properties.name+"</h4><hr>";
+            str += "<a href='"+feature.properties.web+"' target='blank'>";
+            str += "<img src='img/"+feature.properties.image+"' width='200px'>"; 
+            str += "</a>";
+                return L.marker(latlng).bindPopup(str);
+            
+        }});
+        geojsonLayer.addTo(mymap);
+        
         </script>
     </body>
 </html>
